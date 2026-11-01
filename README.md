@@ -3,9 +3,8 @@
 Classify document groups and extract structured fields into a SQLite workspace.
 Review evidence and correct values in a local browser, then export JSON or CSV.
 
-A small version of the [intextum](https://github.com/intextum/intextum) enrichment
-pipeline, using Docling and an OpenAI-compatible model endpoint such as Ollama,
-LM Studio, or vLLM.
+Uses Docling and an OpenAI-compatible model endpoint such as Ollama, LM Studio,
+or vLLM.
 
 ```text
 Documents → Docling → classify group → extract schema fields → SQLite → JSON / CSV
