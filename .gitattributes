@@ -1,0 +1,12 @@
+# Generated JavaScript contains significant whitespace in template literals.
+src/intextum_cli/static/vendor/docling-components.js -whitespace
+
+*.pdf binary
+*.png binary
+*.doc binary
+*.docx binary
+*.xls binary
+*.xlsx binary
+*.ppt binary
+*.pptx binary
+*.odt binary

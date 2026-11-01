@@ -1,0 +1,6 @@
+# Files that belong together but are not alone in one subfolder.
+groups:
+  - name: order-B-2231
+    files: ["bestellung_B-2231_*"]
+  - name: invoice-4471
+    files: ["postfach/2026-09-02_rechnung-4471.*"]

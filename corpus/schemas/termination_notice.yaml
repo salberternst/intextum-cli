@@ -1,0 +1,19 @@
+class: Termination notice
+description: A letter terminating a contract such as a service agreement, subscription or employment
+aliases: [Kündigung]
+fields:
+  - name: sender
+    dtype: str
+    required: true
+    description: Person or company terminating the contract
+  - name: contract_type
+    dtype: str
+    enum: [service, employment, subscription, insurance, other]
+    description: Kind of contract being terminated
+  - name: contract_number
+    dtype: str
+    description: Contract number, if given
+  - name: termination_date
+    dtype: date
+    required: true
+    description: Date the contract should end

@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "intextum-cli"
+version = "0.1.0"
+description = "Classify and extract structured data from a folder of documents with Docling and a local LLM."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [{ name = "Sebastian Alberternst", email = "alberternst@gmail.com" }]
+dependencies = [
+    "docling>=2.60",
+    "docling-core>=2.99,<3",
+    "docling-slim[format-opendocument,format-email,format-latex]",
+    "openai>=1.40,<3",
+    "pydantic>=2.7,<3",
+    "pyyaml>=6",
+    "python-dotenv>=1",
+    "filelock>=3.16,<4",
+]
+
+[project.optional-dependencies]
+ui = ["nicegui>=3.18,<4", "nh3>=0.3,<1"]
+dev = ["pytest>=8", "ruff>=0.6", "openpyxl", "python-docx", "reportlab", "xlwt"]
+docs = ["mkdocs>=1.6,<2"]
+
+[project.scripts]
+intextum = "intextum_cli.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+intextum_cli = ["static/*", "static/vendor/*"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["E501"]

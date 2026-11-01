@@ -1,0 +1,33 @@
+class: Inventory register
+description: A sheet of an inventory register listing custodians and costs in ruled sections
+aliases: [Inventar]
+fields:
+  - name: sheet_number
+    dtype: str
+    required: true
+    description: Number of the register sheet (Blatt)
+  - name: custodians
+    dtype: object_list
+    source_pages_matching: '(?i)Betreuung'
+    description: >-
+      Every numbered entry of the custodians section, including cancelled ones. A tag
+      such as [underlined], [struck through] or [crossed out] after an entry's name
+      means that the entry is cancelled.
+    fields:
+      - {name: number, dtype: int, required: true, description: Entry number}
+      - {name: name, dtype: str, required: true, description: Custodian team's name without any tag}
+      - {name: status, dtype: str, required: true, enum: [active, cancelled], description: cancelled if the name carries a tag, implied_by: {cancelled: {marks: [underline, strike, cross], quote: '(?i)entfernt'}}}
+      - {name: status_quote, dtype: str, verbatim: true, quote_for: [number], description: 'The note in the entry''s last column, word for word without tags; null if it has none'}
+  - name: costs
+    dtype: object_list
+    source_pages_matching: '(?i)Kosten'
+    description: >-
+      Every numbered entry of the costs section, including cancelled ones. A tag
+      such as [underlined], [struck through] or [crossed out] after an entry's description
+      means that the entry is cancelled.
+    fields:
+      - {name: number, dtype: int, required: true, description: Entry number}
+      - {name: description, dtype: str, required: true, description: Cost description without any tag}
+      - {name: amount, dtype: currency, description: Amount of the cost}
+      - {name: status, dtype: str, required: true, enum: [active, cancelled], description: cancelled if the description carries a tag, implied_by: {cancelled: {marks: [underline, strike, cross], quote: '(?i)entfernt'}}}
+      - {name: status_quote, dtype: str, verbatim: true, quote_for: [number], description: 'The note in the entry''s last column, word for word without tags; null if it has none'}

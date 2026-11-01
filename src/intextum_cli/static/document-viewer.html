@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="/document.css">
+  <script type="module" src="/document-viewer.js"></script>
+  <title>Document content</title>
+</head>
+<body class="viewer-shell">
+  <nav aria-label="Document display">
+    <button data-mode="content" aria-pressed="true">Content</button>
+    <button data-mode="elements" aria-pressed="false">Elements</button>
+    <button data-mode="images" aria-pressed="false" hidden>Page images</button>
+    <button id="reset" hidden>Show full document</button>
+    <span id="status" role="status">Loading document…</span>
+  </nav>
+  <main>
+    <iframe id="content" title="Recognized document content" sandbox="allow-same-origin"></iframe>
+    <section id="elements" hidden aria-label="Recognized document elements"></section>
+    <section id="images" hidden aria-label="Document page images"></section>
+    <p id="error" hidden role="alert"></p>
+  </main>
+</body>
+</html>

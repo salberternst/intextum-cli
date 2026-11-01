@@ -1,0 +1,25 @@
+.venv/
+node_modules/
+.playwright-mcp/
+build/
+dist/
+/site/
+__pycache__/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.intextum/
+*-results/
+.env
+.env.*
+!.env.example
+
+# Generated SQLite workspaces and runtime companions
+*.sqlite
+*.sqlite-*
+
+# Private documents, schemas and settings for local test runs
+inbox/
+
+# macOS folder metadata
+.DS_Store

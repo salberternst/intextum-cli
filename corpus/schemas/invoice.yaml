@@ -1,0 +1,28 @@
+class: Invoice
+description: >-
+  A bill requesting payment for goods or services; may arrive with a cover e-mail.
+  A credit note, which refunds money and asks for no payment, is not an invoice.
+aliases: [Rechnung]
+fields:
+  - name: invoice_number
+    dtype: str
+    required: true
+    description: Invoice number as printed, without prefix words like "Nr."
+  - name: invoice_date
+    dtype: date
+    description: Date the invoice was issued
+  - name: seller
+    dtype: str
+    description: >-
+      Name of the company or person issuing the invoice, without trade, address or
+      other letterhead details
+  - name: total_due
+    dtype: currency
+    required: true
+    description: Total amount to be paid, including tax
+  - name: due_date
+    dtype: date
+    description: Date by which payment is due
+  - name: iban
+    dtype: str
+    description: IBAN to pay to, as written

@@ -1,0 +1,36 @@
+class: Invoice
+description: A bill requesting payment for goods or services
+aliases: [Rechnung, bill]
+fields:
+  - name: invoice_number
+    dtype: str
+    required: true
+    description: Invoice number
+  - name: invoice_date
+    dtype: date
+    description: Invoice date
+  - name: seller
+    dtype: str
+    description: Company issuing the invoice
+  - name: currency
+    dtype: str
+    enum: [EUR, USD, CHF, GBP]
+    description: Currency of the invoice totals
+  - name: total_gross
+    dtype: currency
+    required: true
+    description: Total gross invoice amount before any payments
+  - name: amount_due
+    dtype: currency
+    description: Amount still to be paid; 0 if already paid
+  - name: line_items
+    dtype: object_list
+    description: Billed positions, possibly in an attached spreadsheet
+    fields:
+      - {name: description, dtype: str, description: Item text}
+      - {name: quantity, dtype: float, description: Quantity}
+      - {name: amount, dtype: currency, description: Line total}
+    examples:
+      - text: "| Beratung Juni | 12 | 1.440,00 EUR |"
+        value: {description: Beratung Juni, quantity: 12, amount: {amount: 1440.0, currency: EUR}}
+        extraction_text: Beratung Juni

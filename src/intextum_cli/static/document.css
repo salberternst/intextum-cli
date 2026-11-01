@@ -1,0 +1,32 @@
+:root { color-scheme: light; font: 14px/1.65 system-ui, sans-serif; color: #263b4c; background: #fff; }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; }
+.viewer-shell { height: 100dvh; display: flex; flex-direction: column; background: #edf1f5; }
+nav { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 5px 10px; background: #fff; border-bottom: 1px solid #e3e8ee; }
+button { background: transparent; border: 1px solid transparent; border-radius: 6px; padding: 3px 9px; cursor: pointer; color: #52657a; font: inherit; font-size: 11px; }
+button[aria-pressed=true] { background: #eaf5f2; color: #147d76; border-color: #aad6cd; }
+#status { margin-left: auto; font-size: 11px; color: #718096; }
+main { position: relative; flex: 1; min-height: 0; }
+iframe { width: 100%; height: 100%; border: 0; background: #fff; }
+section { height: 100%; overflow: auto; padding: 18px; }
+docling-img, docling-table { display: block; width: 100%; background: white; }
+.component-table { width: 100%; border-collapse: collapse; background: #fff; }
+#error { padding: 24px; color: #9a661e; }
+.document-content { padding: 26px 30px 70px; overflow-wrap: anywhere; }
+.document-content h1, .document-content h2, .document-content h3 { line-height: 1.35; color: #203244; }
+.document-content h1 { font-size: 25px; }
+.document-content h2 { font-size: 20px; }
+.document-content h3 { font-size: 17px; }
+.document-content p { white-space: pre-wrap; margin: 0 0 14px; }
+.document-content table { border-collapse: collapse; width: max-content; min-width: 100%; max-width: 100%; margin: 18px 0; font-size: 12px; }
+.document-content td, .document-content th { border: 1px solid #dce5eb; padding: 8px 11px; white-space: pre-wrap; vertical-align: top; }
+.document-content th { background: #f0f6f5; font-weight: 650; text-align: left; }
+.document-content figure { margin: 20px 0; overflow-x: auto; }
+.document-content img { max-width: 100%; height: auto; }
+.document-content figcaption { color: #718096; font-size: 12px; }
+.document-content pre { white-space: pre-wrap; }
+.document-content .evidence-selected { background: #fff1ba; outline: 3px solid #e8bd56; outline-offset: 4px; scroll-margin: 30px; }
+.embedded nav [data-mode] { display: none; }
+/* Embedded, the bar only carries a selection reset or a status message. */
+.embedded nav:has(#reset[hidden]):has(#status:empty) { display: none; }

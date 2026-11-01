@@ -1,0 +1,28 @@
+class: Purchase order
+description: A customer orders goods from a supplier; often a letter plus a separate positions list
+aliases: [Bestellung, Nachbestellung]
+fields:
+  - name: order_number
+    dtype: str
+    required: true
+    description: Order number stated by the customer
+  - name: order_date
+    dtype: date
+    description: Date of the order
+  - name: delivery_date
+    dtype: date
+    description: Requested (latest) delivery date
+  - name: buyer
+    dtype: str
+    description: Company placing the order
+  - name: total_net
+    dtype: currency
+    description: Total net order value
+  - name: positions
+    dtype: object_list
+    description: Ordered items, usually from the positions table or list
+    fields:
+      - {name: article_number, dtype: str, description: Article number}
+      - {name: description, dtype: str, description: Item description}
+      - {name: quantity, dtype: int, description: Ordered quantity}
+      - {name: unit_price, dtype: float, description: Unit price in EUR}

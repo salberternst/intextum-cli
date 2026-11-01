@@ -1,0 +1,19 @@
+From: Buchhaltung Beispiel IT <buchhaltung@example-it.example>
+To: Muster Baumarkt <info@example-store.example>
+Subject: Ihre Rechnung 4471
+Date: Wed, 02 Sep 2026 09:12:00 +0200
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+SYNTHETIC TEST FIXTURE / FIKTIVE TESTDATEN
+
+Guten Tag,
+
+anbei erhalten Sie unsere Rechnung 4471 für die Wartung Ihres Kassensystems.
+Bitte überweisen Sie den Betrag bis zum 02.10.2026 auf folgendes Konto:
+IBAN: DE00 0000 0000 0000 0000 00
+
+Viele Grüße
+Kim Muster
+Beispiel IT-Service GmbH

@@ -1,0 +1,160 @@
+# Ground truth for corpus/inbox. Only listed fields are scored; strings compare
+# case- and whitespace-insensitively, numbers within 0.01.
+order-2026-0815:           # subfolder group: docx letter + xlsx positions
+  class: Purchase order
+  needs_review: false
+  data:
+    order_number: NW-2026-0815
+    order_date: "2026-08-15"
+    delivery_date: "2026-09-30"
+    buyer: Beispiel Werkzeuge GmbH
+    total_net: {amount: 7914.0, currency: EUR}
+    positions:
+      - {article_number: BZ-110, quantity: 5, unit_price: 289.0}
+      - {article_number: AK-18V, quantity: 12, unit_price: 149.0}
+      - {article_number: SB-250, quantity: 40, unit_price: 23.5}
+      - {article_number: WK-PRO, quantity: 6, unit_price: 623.5}
+
+order-B-2231:              # groups.yaml glob: pdf letter + csv positions
+  class: Purchase order
+  needs_review: false
+  data:
+    order_number: B-2231
+    order_date: "2026-09-03"
+    delivery_date: "2026-09-12"
+    buyer: Beispielbäckerei Muster KG
+    total_net: {amount: 1236.4, currency: EUR}
+    positions:
+      - {article_number: MEH-25, quantity: 20, unit_price: 18.9}
+      - {article_number: ZUC-10, quantity: 15, unit_price: 12.4}
+      - {article_number: HEF-1, quantity: 30, unit_price: 4.48}
+      - {article_number: BUT-5, quantity: 20, unit_price: 26.9}
+
+invoice-4471:              # groups.yaml, out of a folder: eml + pdf; due date/IBAN only in the mail
+  class: Invoice
+  needs_review: false
+  data:
+    invoice_number: "4471"
+    invoice_date: "2026-09-02"
+    seller: Beispiel IT-Service GmbH
+    total_due: {amount: 2915.5, currency: EUR}
+    due_date: "2026-10-02"
+    iban: DE00 0000 0000 0000 0000 00
+
+postfach:                  # what is left in the folder: a newsletter
+  class: null
+
+invoice_scan_INV-7731.png: # OCR, English, GBP
+  class: Invoice
+  data:
+    invoice_number: INV-7731
+    invoice_date: "2026-07-21"
+    seller: Example Consulting Ltd
+    total_due: {amount: 1250.0, currency: GBP}
+    due_date: "2026-08-20"
+
+service_cancellation.odt:    # OpenDocument, third class, enum field
+  class: Termination notice
+  needs_review: false
+  data:
+    sender: Robin Beispiel
+    contract_type: service
+    contract_number: DEMO-5520
+    termination_date: "2026-12-31"
+
+nachbestellung.md:         # order without an order number → must be flagged
+  class: Purchase order
+  needs_review: true
+  data:
+    order_number: null
+    delivery_date: "2026-10-15"
+    positions:
+      - {article_number: AK-18V, quantity: 8, unit_price: 149.0}
+
+order-L-0907:              # legacy Office: .doc letter + .xls positions
+  requires: libreoffice
+  class: Purchase order
+  needs_review: false
+  data:
+    order_number: SH-0907
+    order_date: "2026-09-07"
+    delivery_date: "2026-09-21"
+    buyer: Beispiel Hotel GmbH
+    total_net: {amount: 3052.0, currency: EUR}
+    positions:
+      - {article_number: TL-12, quantity: 12, unit_price: 89.0}
+      - {article_number: SK-40, quantity: 40, unit_price: 24.8}
+      - {article_number: VS-6, quantity: 8, unit_price: 124.0}
+
+kuendigung_abo.rtf:        # legacy RTF, subscription
+  requires: libreoffice
+  class: Termination notice
+  needs_review: false
+  data:
+    sender: Sascha Muster
+    contract_type: subscription
+    contract_number: WH-88213
+    termination_date: "2027-03-31"
+
+quartalsbericht_q3.pptx:   # presentation matching no class
+  class: null
+
+messebericht_2026.ppt:     # legacy PowerPoint matching no class
+  requires: libreoffice
+  class: null
+
+# Classification near misses (see NEAR_MISSES in generate.py).
+auftragsbestaetigung_AB-5521.md:  # supplier confirms an order: not the customer's order
+  class: null
+
+gutschrift_GS-118.md:      # credit note: refunds instead of requesting payment
+  class: null
+
+zahlungserinnerung_4471.md:  # payment reminder about an existing invoice
+  class: null
+
+lieferschein_LS-7702.md:   # delivery note: lists delivered goods, no order or bill
+  class: null
+
+honorarnote_2026-17.md:    # a fee note is an invoice without saying "Rechnung"
+  class: Invoice
+  data:
+    invoice_number: "2026-17"
+    invoice_date: "2026-10-14"
+    seller: Mika Beispiel
+    total_due: {amount: 1899.24, currency: EUR}
+    due_date: "2026-10-28"
+
+inventory_sample_scan.pdf:        # scanned ruled form, marks drawn in the image
+  class: Inventory register
+  needs_review: false
+  data:
+    sheet_number: "101"
+    custodians:
+      - {number: 1, name: Team Alpha, status: cancelled, status_quote: Entfernt am 07.04.2016}
+      - {number: 2, name: Team Beta, status: cancelled, status_quote: Entfernt}
+      - {number: 3, name: Team Gamma, status: active}   # a printed rule lies just below
+      - {number: 4, name: Team Delta, status: active}
+      - {number: 5, name: Team Epsilon, status: cancelled, status_quote: Entfernt}
+      - {number: 6, name: Team Zeta, status: active, status_quote: Erfasst am 22.08.2017}
+    costs:
+      - {number: 1, description: Transport, amount: {amount: 30000.0, currency: DEM}, status: cancelled, status_quote: Entfernt am 21.05.2020}
+      - {number: 2, description: Wartung, amount: {amount: 3000.0, currency: DEM}, status: active}
+      - {number: 3, description: Material, amount: {amount: 120000.0, currency: DEM}, status: active, status_quote: Erfasst am 11.11.2019}
+
+inventory_example_digital.pdf:  # native text with drawn PDF lines
+  class: Inventory register
+  needs_review: false
+  data:
+    sheet_number: "202"
+    custodians:
+      - {number: 1, name: Team Eta, status: cancelled, status_quote: Entfernt am 07.04.2016}
+      - {number: 2, name: Team Theta, status: cancelled, status_quote: Entfernt}
+      - {number: 3, name: Team Iota, status: active}   # a printed rule lies just below
+      - {number: 4, name: Team Kappa, status: active}
+      - {number: 5, name: Team Lambda, status: cancelled, status_quote: Entfernt}
+      - {number: 6, name: Team My, status: active, status_quote: Erfasst am 22.08.2017}
+    costs:
+      - {number: 1, description: Versand, amount: {amount: 30000.0, currency: DEM}, status: cancelled, status_quote: Entfernt am 21.05.2020}
+      - {number: 2, description: Service, amount: {amount: 3000.0, currency: DEM}, status: active}
+      - {number: 3, description: Zubehör, amount: {amount: 120000.0, currency: DEM}, status: active, status_quote: Erfasst am 11.11.2019}

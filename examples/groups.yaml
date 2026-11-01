@@ -1,0 +1,14 @@
+# Optional: put this file at the top of the input folder.
+# Top-level subfolders are already one group each, and loose files are their own
+# group; list groups here only when files that belong together are not in one
+# subfolder, or to skip classification for a group.
+groups:
+  - name: order-4711
+    files:
+      - letters/2026-08-12_bestellung_4711.pdf   # a single file
+      - tables/positions-4711.xlsx
+  - name: case-17
+    class: Invoice                             # optional: skip classification
+    files:
+      - "*-17.*"                               # glob, relative to the input folder
+      - scans/17                               # a folder: every file below it
