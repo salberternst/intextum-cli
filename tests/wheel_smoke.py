@@ -103,7 +103,7 @@ def main() -> None:
         assert "@docling/docling-core" in notices
         with TestClient(build_app(library)) as client:
             response = client.get("/")
-            assert response.status_code == 200 and "DOCUMENT REVIEW" in response.text
+            assert response.status_code == 200 and "Document review" in response.text
             for asset, route in (
                 ("review.css", "/review.css"),
                 ("document.css", "/document.css"),
