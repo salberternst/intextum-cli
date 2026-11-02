@@ -394,3 +394,47 @@ def test_empty_workspace_renders_without_a_result_schema(tmp_path):
         assert response.status_code == 200
         assert "Your review workspace" in response.text
         assert "No extracted fields" in response.text
+
+
+def test_path_evidence_is_shown_without_a_document_link(tmp_path):
+    pytest.importorskip("nicegui")
+    import asyncio
+
+    from nicegui import ui
+    from nicegui.testing import user_simulation
+
+    from intextum_cli.review_ui import ReviewWorkspace
+
+    evidence = {
+        "kind": "path",
+        "file": "Sample/supplier-order.doc",
+        "page": None,
+        "snippet": "P-1234",
+    }
+    lib = library(
+        tmp_path,
+        {
+            "order": result(
+                needs_review=False,
+                review_reasons=[],
+                fields={"Project": {"value": "P-1234", "evidence": [evidence]}},
+            )
+        },
+    )
+
+    async def scenario():
+        async def page():
+            await ReviewWorkspace(lib).build()
+
+        async with user_simulation(page) as user:
+            await user.open("/")
+            await user.should_see("From file path: P-1234")
+            with user:
+                buttons = [
+                    el
+                    for el in user.find(ui.button).elements
+                    if "evidence-button" in el.classes
+                ]
+            assert not buttons
+
+    asyncio.run(scenario())

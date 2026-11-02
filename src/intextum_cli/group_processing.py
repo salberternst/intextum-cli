@@ -109,6 +109,7 @@ def process_group(
             max_retries=options.retries,
             label=f"extract {group.name}",
             max_chars=options.max_chars,
+            source_paths={group.relative(path): path for path in group.files},
         )
     except LlmError as exc:
         return finish_result(result, status="failed", error=f"extraction failed: {exc}")

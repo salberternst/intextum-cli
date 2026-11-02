@@ -143,6 +143,16 @@ class FieldPanel:
                     f"{len(evidence)} evidence passage(s)", icon="format_quote"
                 ).classes("evidence-list w-full"):
                     for item in evidence:
+                        # A path has no passage in the document to reveal.
+                        if item.get("kind") == "path":
+                            with ui.column().classes("gap-1 w-full"):
+                                ui.label(item.get("file") or "Source").classes(
+                                    "evidence-location"
+                                )
+                                ui.label(
+                                    f"From file path: {item.get('snippet') or ''}"
+                                ).classes("evidence-quote")
+                            continue
                         with (
                             ui.button(on_click=partial(self.document.reveal, item))
                             .props("flat no-caps align=left")

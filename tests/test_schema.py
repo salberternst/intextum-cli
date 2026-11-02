@@ -190,3 +190,40 @@ def test_unique_is_only_allowed_on_identifiers():
                 ],
             }
         )
+
+
+@pytest.mark.parametrize(
+    "field, message",
+    [
+        ({"from_path": {"pattern": "P-\\d+"}}, "capture group"),
+        ({"from_path": {"pattern": "("}}, "invalid from_path"),
+        ({"dtype": "list", "from_path": {"pattern": "(a)"}}, "str, int or date"),
+        (
+            {"source_pages_matching": "a", "from_path": {"pattern": "(a)"}},
+            "does not read documents",
+        ),
+        (
+            {"external": {"when": "missing"}, "from_path": {"pattern": "(a)"}},
+            "does not read documents",
+        ),
+    ],
+)
+def test_from_path_rejects_invalid_definitions(field, message):
+    with pytest.raises(ValueError, match=message):
+        SchemaField(name="project_id", **field)
+
+
+def test_from_path_field_cannot_appear_in_scenes():
+    with pytest.raises(ValueError, match="from_path field"):
+        DocumentClass.model_validate(
+            {
+                "class": "Project file",
+                "fields": [{"name": "project_id", "from_path": {"pattern": "(a)"}}],
+                "scenes": [
+                    {
+                        "text": "Example",
+                        "extractions": [{"field": "project_id", "value": "a"}],
+                    }
+                ],
+            }
+        )

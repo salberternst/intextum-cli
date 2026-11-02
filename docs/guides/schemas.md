@@ -53,6 +53,35 @@ pages (or the matching file for unpaged text). Only those pages are sent to the
 extraction model and used to locate that field's evidence. A field with no
 matching pages is flagged `no_matching_source_pages:<field>` for review.
 
+## Values from the file path
+
+`from_path` reads a value from the file path instead of the document, for
+example a project ID in a folder name:
+
+```yaml
+- name: project_id
+  dtype: str
+  required: true
+  from_path:
+    pattern: '/(P-\d{4,})[^/]*/'
+```
+
+The pattern runs locally against each file's absolute path, with forward slashes
+and symlinks resolved. The first capture group of the first match is the value,
+so folders above the input folder can match too; write the pattern narrowly
+enough to skip them. The path is not sent to the model for this field, and
+results store only the relative file and the matched text.
+
+The field must be `str`, `int` or `date`, and cannot use `external`,
+`source_pages_matching`, `examples` or scenes. `enum` and `empty_values` still
+apply. If no path matches, a required field gets `missing_required:<field>`. If
+the files of a group yield different values, the value stays empty and the field
+gets `invalid:<field>` with a `conflicting_paths` validation error. Verification
+skips these values because the document need not state them.
+
+Renaming a folder re-extracts the group only if the file's relative path or the
+captured value changes; moving the whole input folder changes neither.
+
 ## Quoted evidence
 
 Child fields inside an `object_list` can set `verbatim: true` on a `str` field,

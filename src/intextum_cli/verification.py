@@ -98,10 +98,15 @@ def field_question(name: str, value: Any, description: str = "") -> dict:
 
 
 def extracted_values(result: dict) -> dict[str, Any]:
-    """The model's values, before corrections, that are worth checking."""
+    """The model's values, before corrections, that are worth checking.
+
+    Values read from a file path are skipped: the document need not state them.
+    """
     values = {}
     for name, entry in (result.get("fields") or {}).items():
         if not isinstance(entry, dict):
+            continue
+        if any(item.get("kind") == "path" for item in entry.get("evidence") or []):
             continue
         value = entry.get("extracted_value", entry.get("value"))
         if value not in (None, "", [], {}):

@@ -363,3 +363,42 @@ def test_configured_class_is_not_doubted(workspace):
     # groups.yaml/--class choices are deliberate; only fields are checked.
     assert "document_class" not in decider.calls[0]["questions"]
     assert "class_check" not in store.results.get("invoice", by_group=True)
+
+
+def test_path_values_are_not_checked_against_the_document(tmp_path, fake_llm):
+    root = tmp_path / "P-77 Example" / "inbox"
+    root.mkdir(parents=True)
+    (root / "invoice.txt").write_text("Invoice INV-42 from Example Ltd")
+    classes = [
+        DocumentClass.model_validate(
+            {
+                "class": "Invoice",
+                "fields": [
+                    {"name": "project", "from_path": {"pattern": r"/(P-\d+)[^/]*/"}},
+                    {"name": "number"},
+                ],
+            }
+        )
+    ]
+    llm = fake_llm(
+        lambda *_: {"number": {"value": "INV-42", "evidence_anchor": "INV-42"}}
+    )
+    store = WorkspaceStore(tmp_path / "results.sqlite", create=True)
+    decider = FakeDecider(doubtful={"P-77"})
+    summary = run(
+        [Group("invoice", root, [root / "invoice.txt"], "Invoice")],
+        converter=Converter(store),
+        classifier=LlmClassifier(llm, store),
+        llm=llm,
+        options=Options(classes=classes, model=llm.model),
+        store=store,
+        report=lambda _: None,
+        verifier=(decider, VerifierSettings("fake-kev", "http://localhost:1/v1", None)),
+    )
+    assert summary.needs_review == 0
+    result = store.results.get("invoice", by_group=True)
+    assert result["data"]["project"] == "P-77"
+    assert "verification" not in result["fields"]["project"]
+    assert result["fields"]["number"]["verification"]["probability"] == 0.97
+    (call,) = decider.calls
+    assert all("P-77" not in q["instructions"] for q in call["questions"].values())

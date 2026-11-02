@@ -120,6 +120,30 @@ class ExternalSource(BaseModel):
     when: Literal["auto", "missing", "always"] = "auto"
 
 
+class FromPath(BaseModel):
+    """Read a value from each source file's absolute path, without a model."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    # The first capture group of the first match is the value.
+    pattern: str = Field(min_length=1)
+
+    @field_validator("pattern")
+    @classmethod
+    def _check_pattern(cls, value: str) -> str:
+        try:
+            compiled = re.compile(value)
+        except re.error as exc:
+            raise ValueError(f"invalid from_path pattern: {exc}") from exc
+        if not compiled.groups:
+            raise ValueError("from_path pattern needs a capture group")
+        return value
+
+    def capture(self, path: Path) -> str | None:
+        match = re.search(self.pattern, path.as_posix())
+        return match.group(1) if match else None
+
+
 class SchemaField(BaseModel):
     """One value to extract."""
 
@@ -135,6 +159,7 @@ class SchemaField(BaseModel):
     examples: list[Example] = Field(default_factory=list)
     external: ExternalSource | None = None
     source_pages_matching: str | None = None
+    from_path: FromPath | None = None
 
     @field_validator("source_pages_matching")
     @classmethod
@@ -156,6 +181,14 @@ class SchemaField(BaseModel):
             raise ValueError(f"{self.name}: child 'fields' only allowed on object_list")
         if self.enum and self.dtype not in {"str", "list"}:
             raise ValueError(f"{self.name}: enum only allowed on str or list")
+        if self.from_path:
+            if self.dtype not in {"str", "int", "date"}:
+                raise ValueError(f"{self.name}: from_path needs str, int or date")
+            if self.external or self.source_pages_matching or self.examples:
+                raise ValueError(
+                    f"{self.name}: from_path does not read documents, so it cannot "
+                    "use external, source_pages_matching or examples"
+                )
         names = {child.name for child in self.fields}
         for child in self.fields:
             unknown = set(child.quote_for) - (names - {child.name})
@@ -216,11 +249,16 @@ class DocumentClass(BaseModel):
             if field.name in seen:
                 raise ValueError(f"duplicate field name '{field.name}'")
             seen.add(field.name)
+        path_fields = {field.name for field in self.fields if field.from_path}
         for scene in self.scenes:
             for extraction in scene.extractions:
                 if extraction.field not in seen:
                     raise ValueError(
                         f"scene refers to unknown field '{extraction.field}'"
+                    )
+                if extraction.field in path_fields:
+                    raise ValueError(
+                        f"scene refers to from_path field '{extraction.field}'"
                     )
         return self
 

@@ -4,7 +4,8 @@ Rules catch missing, invalid, and unsupported values, but not a confident
 mistake, such as the sender extracted as the buyer. An optional decision model
 checks each non-empty extracted field against the document and returns the
 probability that the document states that value in that role. Fields below the
-threshold get `unverified:<field>` and need review; the viewer shows the probability as
+threshold get `unverified:<field>` and need review (`from_path` values are not
+checked, because the document need not state them); the viewer shows the probability as
 **Verified 97%** or **Doubtful 8%** on each field card.
 
 The same request also checks automatic classifications, including unclassified

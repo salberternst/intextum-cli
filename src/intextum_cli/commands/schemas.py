@@ -23,5 +23,6 @@ def cmd_check_schemas(args: argparse.Namespace) -> int:
         print(f"{document_class.name}: {len(document_class.fields)} field(s){suffix}")
         for field in document_class.fields:
             flags = " required" if field.required else ""
+            flags += " from_path" if field.from_path else ""
             print(f"  - {field.name} ({field.dtype}){flags}")
     return 0

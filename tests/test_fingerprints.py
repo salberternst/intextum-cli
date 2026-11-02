@@ -71,3 +71,30 @@ def test_ocr_settings_invalidate_extraction(tmp_path, settings):
     assert fingerprints.fingerprint(group, initial) != fingerprints.fingerprint(
         group, changed
     )
+
+
+def test_from_path_fingerprint_follows_captured_values_not_location(tmp_path):
+    options = Options(
+        classes=[
+            DocumentClass.model_validate(
+                {
+                    "class": "Project file",
+                    "fields": [
+                        {"name": "project", "from_path": {"pattern": r"/(P-\d+)/"}}
+                    ],
+                }
+            )
+        ],
+        model="test",
+    )
+
+    def fingerprint_at(*parts):
+        root = tmp_path.joinpath(*parts)
+        root.mkdir(parents=True)
+        path = root / "letter.txt"
+        path.write_text("Example letter")
+        return fingerprints.fingerprint(Group("g", root, [path]), options)
+
+    original = fingerprint_at("archive", "P-1")
+    assert fingerprint_at("moved", "P-1") == original
+    assert fingerprint_at("archive", "P-2") != original

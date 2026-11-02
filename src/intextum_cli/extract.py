@@ -6,6 +6,7 @@ import logging
 import re
 from dataclasses import dataclass, field
 from datetime import date
+from pathlib import Path
 from typing import Any
 
 from .conversion_marks import has_mark_tag
@@ -362,6 +363,35 @@ def _duplicate_errors(
     return errors
 
 
+def _path_field_result(
+    schema_field: SchemaField, source_paths: dict[str, Path]
+) -> FieldResult | None:
+    """Read a ``from_path`` value; None if no file's path holds one.
+
+    Evidence names the relative file and the matched text only, so results stay
+    portable and do not record where a workspace lives.
+    """
+    found: dict[Any, list[dict[str, Any]]] = {}
+    for name, path in source_paths.items():
+        raw = schema_field.from_path.capture(path)
+        value = _drop_empty_values(
+            coerce(raw, schema_field.dtype), schema_field.empty_values
+        )
+        if not is_empty(value):
+            found.setdefault(value, []).append(
+                {"kind": "path", "file": name, "page": None, "snippet": raw.strip()}
+            )
+    if not found:
+        return None
+    if len(found) > 1:
+        # Show one file per value: the reviewer has to choose between them.
+        evidence = [items[0] for items in found.values()][:3]
+        return FieldResult(None, evidence, validation_errors=["conflicting_paths"])
+    ((value, items),) = found.items()
+    errors = validation_errors(value, schema_field.dtype, schema_field.enum)
+    return FieldResult(value, items[:3], validation_errors=errors)
+
+
 # --- orchestration ------------------------------------------------------------
 
 
@@ -375,17 +405,21 @@ def extract(
     find_references: bool = True,
     label: str = "",
     max_chars: int | None = None,
+    source_paths: dict[str, Path] | None = None,
 ) -> ExtractionResult:
     """Extract all fields of ``document_class`` from ``source``.
 
     With ``max_chars``, each call's text is shortened after selecting its pages,
     so fields limited to one section can read all of that section.
 
+    ``source_paths`` maps file names to absolute paths for ``from_path`` fields.
+    These fields never reach the model, and neither do the absolute paths.
+
     With ``find_references``, fields that have ``external`` are resolved later by
     the caller: they do not trigger retries or ``missing_required``, and the model
     reports any sentence pointing to an attachment for them.
     """
-    schema_fields = document_class.fields
+    schema_fields = [f for f in document_class.fields if not f.from_path]
     deferred = (
         {f.name for f in schema_fields if f.external} if find_references else set()
     )
@@ -479,7 +513,18 @@ def extract(
 
     data: dict[str, Any] = {}
     results: dict[str, FieldResult] = {}
-    for schema_field in schema_fields:
+    for schema_field in document_class.fields:
+        if schema_field.from_path:
+            path_result = _path_field_result(schema_field, source_paths or {})
+            if path_result is None:
+                path_result = FieldResult(value=None)
+                if schema_field.required:
+                    review.append(f"missing_required:{schema_field.name}")
+            elif path_result.validation_errors:
+                review.append(f"invalid:{schema_field.name}")
+            data[schema_field.name] = path_result.value
+            results[schema_field.name] = path_result
+            continue
         field_records = records.get(schema_field.name, [])
         repeated = schema_field.dtype in REPEATED_DTYPES
         if not field_records:

@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from intextum_cli.convert import ConvertedFile
 from intextum_cli.extract import extract
 from intextum_cli.extraction_prompt import build_prompt, field_batches, response_schema
@@ -381,3 +383,125 @@ def test_float_that_may_be_a_decimal_is_flagged_for_review(fake_llm):
     assert result.fields["rows"].validation_errors == ["weight:ambiguous_number"]
     assert result.fields["count"].validation_errors == []
     assert set(result.review_reasons) == {"invalid:rate", "invalid:rows"}
+
+
+PATH_CLASS = DocumentClass.model_validate(
+    {
+        "class": "Project letter",
+        "fields": [
+            {
+                "name": "project_id",
+                "required": True,
+                "from_path": {"pattern": r"/(P-\d+)[^/]*/"},
+            },
+            {"name": "subject", "description": "Subject line"},
+        ],
+    }
+)
+PATH_SOURCE = build_source(
+    [ConvertedFile("letter.txt", ["Subject: Example roof"])], max_chars=None
+)
+
+
+def _subject_reply(name, user, schema):
+    return {"subject": {"value": "Example roof", "evidence_anchor": "Example roof"}}
+
+
+def test_from_path_reads_above_input_folder_without_the_model(fake_llm):
+    llm = fake_llm(_subject_reply)
+    result = extract(
+        llm,
+        PATH_CLASS,
+        PATH_SOURCE,
+        source_paths={"letter.txt": Path("/data/P-1234 Example/inbox/letter.txt")},
+    )
+    assert result.data == {"project_id": "P-1234", "subject": "Example roof"}
+    assert result.review_reasons == []
+    assert result.fields["project_id"].evidence == [
+        {"kind": "path", "file": "letter.txt", "page": None, "snippet": "P-1234"}
+    ]
+    (call,) = llm.calls
+    assert "project_id" not in call["user"]
+    assert "project_id" not in call["schema"]["properties"]
+    assert "/data/" not in call["user"]
+
+
+def test_from_path_only_class_makes_no_model_call(fake_llm):
+    only_path = DocumentClass.model_validate(
+        {
+            "class": "Project file",
+            "fields": [
+                {"name": "year", "dtype": "int", "from_path": {"pattern": "/(\\d{4})/"}}
+            ],
+        }
+    )
+    llm = fake_llm(_subject_reply)
+    result = extract(
+        llm, only_path, PATH_SOURCE, source_paths={"a.txt": Path("/data/2026/a.txt")}
+    )
+    assert result.data == {"year": 2026} and result.llm_calls == 0 and not llm.calls
+
+
+def test_from_path_without_match_flags_required_field_without_retrying(fake_llm):
+    llm = fake_llm(_subject_reply)
+    result = extract(
+        llm,
+        PATH_CLASS,
+        PATH_SOURCE,
+        max_retries=2,
+        source_paths={"letter.txt": Path("/data/other/letter.txt")},
+    )
+    assert result.data["project_id"] is None
+    assert result.review_reasons == ["missing_required:project_id"]
+    assert len(llm.calls) == 1
+
+
+def test_from_path_conflict_between_files_needs_review(fake_llm):
+    result = extract(
+        fake_llm(_subject_reply),
+        PATH_CLASS,
+        PATH_SOURCE,
+        source_paths={
+            "a/letter.txt": Path("/data/P-1/a/letter.txt"),
+            "b/letter.txt": Path("/data/P-2/b/letter.txt"),
+            "c/letter.txt": Path("/data/P-2/c/letter.txt"),
+        },
+    )
+    field = result.fields["project_id"]
+    assert field.value is None and field.validation_errors == ["conflicting_paths"]
+    assert [item["snippet"] for item in field.evidence] == ["P-1", "P-2"]
+    assert result.review_reasons == ["invalid:project_id"]
+
+
+def test_from_path_agreeing_and_unmatched_files_keep_the_value(fake_llm):
+    result = extract(
+        fake_llm(_subject_reply),
+        PATH_CLASS,
+        PATH_SOURCE,
+        source_paths={
+            "a.txt": Path("/data/P-1/a.txt"),
+            "b.txt": Path("/data/P-1/b.txt"),
+            "c.txt": Path("/elsewhere/c.txt"),
+        },
+    )
+    assert result.data["project_id"] == "P-1" and result.review_reasons == []
+    assert len(result.fields["project_id"].evidence) == 2
+
+
+def test_from_path_invalid_capture_needs_review(fake_llm):
+    numeric = DocumentClass.model_validate(
+        {
+            "class": "Project file",
+            "fields": [
+                {"name": "number", "dtype": "int", "from_path": {"pattern": "/(x+)/"}}
+            ],
+        }
+    )
+    result = extract(
+        fake_llm(_subject_reply),
+        numeric,
+        PATH_SOURCE,
+        source_paths={"a.txt": Path("/data/xx/a.txt")},
+    )
+    assert result.review_reasons == ["invalid:number"]
+    assert result.fields["number"].validation_errors == ["invalid_integer"]

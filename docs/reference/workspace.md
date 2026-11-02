@@ -76,7 +76,8 @@ The following is an abbreviated result:
 ```
 
 `fields` keeps evidence and validation details; `data` provides the current
-corrected values. The `review` object records the review decision and history,
+corrected values. Evidence for a [`from_path`](../guides/schemas.md#values-from-the-file-path)
+field has `"kind": "path"`, and its `snippet` is the text matched in the path. The `review` object records the review decision and history,
 and corrections appear under `edits`. See
 [Correct fields and tables](../guides/review.md#correct-fields-and-tables).
 

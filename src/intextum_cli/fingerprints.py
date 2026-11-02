@@ -74,8 +74,16 @@ def fingerprint(
         if scope is not None
         else {}
     )
+    # Only what patterns capture: moving a whole workspace changes no value.
+    path_values = {
+        f.from_path.pattern: [f.from_path.capture(path) for path in group.files]
+        for c in options.classes
+        for f in c.fields
+        if f.from_path
+    }
     payload = {
         "neighbours": neighbours,
+        "path_values": path_values,
         "overrides": overrides,
         "duplicates": duplicates or {},
         "code": _code_digest(),

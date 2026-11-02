@@ -26,6 +26,8 @@
       decimal. Because `2.125` could be a decimal, a `float` value in that form
       also gets an `ambiguous_number` validation error for review. Currency
       abbreviations such as `DM` map to ISO codes (`DEM`).
+    - [`from_path`](../guides/schemas.md#values-from-the-file-path) fields are
+      read from file paths locally and are not part of any model call.
 
 ## Model statistics
 
