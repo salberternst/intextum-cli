@@ -282,6 +282,51 @@ def test_nicegui_correction_and_search_clear(tmp_path, monkeypatch):
     asyncio.run(scenario())
 
 
+def test_nicegui_counts_list_items_without_evidence(tmp_path):
+    pytest.importorskip("nicegui")
+    import asyncio
+
+    from nicegui import ui
+    from nicegui.testing import user_simulation
+
+    from intextum_cli.review_ui import ReviewWorkspace
+
+    lib = library(
+        tmp_path,
+        {
+            "order": result(
+                review_reasons=["no_evidence:Conditions"],
+                fields={
+                    "Conditions": {
+                        "value": ["First", "Second", "Third"],
+                        "evidence": [{"file": "a", "page": 1, "snippet": "First"}],
+                        "item_evidence": [
+                            [{"file": "a", "page": 1, "snippet": "First"}],
+                            [],
+                            [],
+                        ],
+                    }
+                },
+            )
+        },
+    )
+
+    async def scenario():
+        async def page():
+            await ReviewWorkspace(lib).build()
+
+        async with user_simulation(page) as user:
+            await user.open("/")
+            await user.should_see("no evidence for 2 of 3 item(s)")
+            await user.should_see("1 evidence passage(s)")
+            table = next(iter(user.find(ui.table).elements))
+            assert table.columns[0]["label"] == "Evidence"
+            marks = [row["__intextum_evidence"] for row in table.rows]
+            assert marks == ["Found", "Missing", "Missing"]
+
+    asyncio.run(scenario())
+
+
 def test_document_selection_search_and_navigation_preserve_shared_results(
     tmp_path, monkeypatch
 ):

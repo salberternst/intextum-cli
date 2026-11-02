@@ -1,10 +1,14 @@
 import pytest
 
 from intextum_cli.review import (
+    EVIDENCE_COLUMN,
+    ROW_ID,
     display_value,
     document_rows,
     field_spec,
     filtered_groups,
+    items_without_evidence,
+    mark_missing_evidence,
     normalize_edit,
     source_html,
 )
@@ -167,3 +171,29 @@ def test_value_formatting_keeps_false_and_zero_visible():
     assert display_value(0) == "0"
     assert display_value(None) == "Not provided"
     assert display_value({"amount": 1234.5, "currency": "EUR"}) == "1,234.50 EUR"
+
+
+def test_items_without_evidence_lists_unmatched_positions():
+    entry = {"value": ["a", "b", "c"], "item_evidence": [[{"page": 1}], [], []]}
+    assert items_without_evidence(entry) == [1, 2]
+
+
+@pytest.mark.parametrize(
+    "entry",
+    [
+        {"value": "a", "evidence": []},
+        {"value": ["a"]},
+        {"value": ["a", "b"], "item_evidence": [[]]},
+        {"value": ["corrected"], "item_evidence": [[]], "edited": True},
+    ],
+)
+def test_items_without_evidence_ignores_entries_it_cannot_count(entry):
+    assert items_without_evidence(entry) == []
+
+
+def test_mark_missing_evidence_adds_leading_column():
+    rows = [{ROW_ID: 0, "value": "a"}, {ROW_ID: 1, "value": "b"}]
+    columns = [{"name": "value"}]
+    mark_missing_evidence(rows, columns, [1])
+    assert columns[0]["label"] == "Evidence"
+    assert [row[EVIDENCE_COLUMN] for row in rows] == ["Found", "Missing"]

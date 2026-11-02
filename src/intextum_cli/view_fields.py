@@ -8,7 +8,12 @@ from pathlib import Path
 
 from nicegui import run, ui
 
-from .review import display_value, field_spec
+from .review import (
+    display_value,
+    field_spec,
+    items_without_evidence,
+    mark_missing_evidence,
+)
 from .schema import REPEATED_DTYPES
 from .store import StorageError
 from .view import Library
@@ -107,8 +112,11 @@ class FieldPanel:
             if spec.description:
                 ui.label(spec.description).classes("field-description")
             value = entry.get("value")
+            missing = items_without_evidence(entry)
             if spec.dtype in REPEATED_DTYPES and isinstance(value, list) and value:
                 rows, columns = table_data(value, spec)
+                if missing:
+                    mark_missing_evidence(rows, columns, missing)
                 ui.table(
                     rows=rows, columns=columns, row_key="__intextum_row", pagination=5
                 ).props("flat dense wrap-cells").classes("w-full result-table")
@@ -120,6 +128,8 @@ class FieldPanel:
                 dict.fromkeys(issues + (entry.get("validation_errors") or []))
             ):
                 label = ISSUE_LABELS.get(issue, issue.replace("_", " "))
+                if issue == "no_evidence" and missing:
+                    label = f"no evidence for {len(missing)} of {len(value)} item(s)"
                 ui.label(label).classes("field-issue")
             if entry.get("edited"):
                 ui.label(

@@ -87,7 +87,7 @@ Common `review_reasons` include:
 | --- | --- |
 | `missing_required:<field>` | A required value is empty. |
 | `invalid:<field>` | A value failed type or schema validation. |
-| `no_evidence:<field>` | An extracted value lacks source evidence. |
+| `no_evidence:<field>` | An extracted value lacks source evidence. A list field gets this when any item does; `intextum view` counts those items and marks their table rows. |
 | `no_matching_source_pages:<field>` | The field's page selector matched nothing. |
 | `external_source_uncertain:<field>` | Attachment ranking is inconclusive. |
 | `external_source_not_found:<field>` | No attachment qualifies. |

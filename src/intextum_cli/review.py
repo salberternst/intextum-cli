@@ -13,6 +13,37 @@ from .schema import ChildField, SchemaField
 from .values import coerce, is_empty, validation_errors
 
 ROW_ID = "__intextum_row"
+EVIDENCE_COLUMN = "__intextum_evidence"
+
+
+def items_without_evidence(entry: dict[str, Any]) -> list[int]:
+    """Positions of the extracted list items that have no evidence passage."""
+    value = entry.get("value")
+    evidence = entry.get("item_evidence")
+    # A correction replaces the items the evidence was recorded for.
+    if entry.get("edited") or not isinstance(value, list) or not evidence:
+        return []
+    if len(evidence) != len(value):
+        return []
+    return [index for index, items in enumerate(evidence) if not items]
+
+
+def mark_missing_evidence(
+    rows: list[dict[str, Any]], columns: list[dict[str, Any]], missing: list[int]
+) -> None:
+    """Add a sortable leading column saying which table rows lack evidence."""
+    for row in rows:
+        row[EVIDENCE_COLUMN] = "Missing" if row[ROW_ID] in missing else "Found"
+    columns.insert(
+        0,
+        {
+            "name": EVIDENCE_COLUMN,
+            "field": EVIDENCE_COLUMN,
+            "label": "Evidence",
+            "align": "left",
+            "sortable": True,
+        },
+    )
 
 
 def infer_dtype(value: Any) -> str:
