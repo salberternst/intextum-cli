@@ -23,6 +23,7 @@ dependencies = [
 
 [project.optional-dependencies]
 ui = ["nicegui>=3.18,<4", "nh3>=0.3,<1"]
+ocrmac = ["ocrmac>=1.0,<2; sys_platform == 'darwin'"]
 dev = ["pytest>=8", "ruff>=0.6", "openpyxl", "python-docx", "reportlab", "xlwt"]
 docs = ["mkdocs>=1.6,<2"]
 

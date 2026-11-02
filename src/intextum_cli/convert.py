@@ -209,6 +209,7 @@ class Converter:
     def _build_docling(self, *, force_ocr: bool):
         from docling.datamodel.base_models import InputFormat
         from docling.datamodel.pipeline_options import (
+            OcrMacOptions,
             PdfPipelineOptions,
             TesseractCliOcrOptions,
         )
@@ -227,6 +228,8 @@ class Converter:
         options.document_timeout = self.document_timeout
         if self.ocr_engine == "tesseract":
             options.ocr_options = TesseractCliOcrOptions()
+        elif self.ocr_engine == "ocrmac":
+            options.ocr_options = OcrMacOptions()
         if self.ocr_languages:
             options.ocr_options.lang = list(self.ocr_languages)
         options.ocr_options.force_full_page_ocr = force_ocr

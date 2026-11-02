@@ -32,6 +32,10 @@ intextum convert "inbox/register.pdf" --force-ocr --ocr-engine tesseract --ocr-l
 
 `tesseract` selects Docling's Tesseract CLI engine. Tesseract must be installed
 and the requested language must appear in `tesseract --list-langs`.
+
+`ocrmac` selects Docling's Apple Vision engine, which runs on macOS only. Install
+it with `pip install "intextum-cli[ocrmac]"` and name languages as macOS reports
+them, for example `--ocr-engine ocrmac --ocr-language de-DE`.
 `--ocr-language` can be repeated, for example `--ocr-language deu --ocr-language eng`;
 codes follow the selected engine. Without these options, Docling chooses its OCR
 engine and default languages.

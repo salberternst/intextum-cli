@@ -62,6 +62,19 @@ def test_ocr_engine_and_languages_have_separate_persistent_caches(tmp_path):
     assert record.settings["table_mode"] == "predicted"
 
 
+def test_ocrmac_engine_reaches_docling_and_changes_the_cache_key(tmp_path):
+    from docling.datamodel.base_models import InputFormat
+
+    converter = Converter(ocr_engine="ocrmac", ocr_languages=["de-DE"])
+    docling = converter._build_docling(force_ocr=False)
+    options = docling.format_to_options[InputFormat.PDF].pipeline_options
+    assert options.ocr_options.kind == "ocrmac"
+    assert options.ocr_options.lang == ["de-DE"]
+    path = tmp_path / "scan.pdf"
+    path.write_bytes(b"x")
+    assert converter.cache_key(path) != Converter().cache_key(path)
+
+
 def test_document_timeout_reaches_docling_without_changing_the_cache_key(tmp_path):
     from docling.datamodel.base_models import InputFormat
 

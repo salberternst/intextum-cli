@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from .verification import VerifierSettings
 
 DEFAULT_BASE_URL = "http://localhost:11434/v1"
-OCR_ENGINES = ("auto", "tesseract")
+OCR_ENGINES = ("auto", "tesseract", "ocrmac")
 TABLE_MODES = ("ruled", "docling", "predicted")
 DEFAULT_DOCUMENT_TIMEOUT = 180.0
 _SWITCHES = {

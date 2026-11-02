@@ -78,7 +78,7 @@ table modes, and mark detection limits.
 | Option | Behavior |
 | --- | --- |
 | `--force-ocr` | OCR every page. |
-| `--ocr-engine auto\|tesseract` | Docling automatic selection (default) or its Tesseract CLI engine; `INTEXTUM_OCR_ENGINE`. |
+| `--ocr-engine auto\|tesseract\|ocrmac` | Docling automatic selection (default), its Tesseract CLI engine, or its Apple Vision engine on macOS; `INTEXTUM_OCR_ENGINE`. |
 | `--ocr-language LANGUAGE` | Repeat for multiple engine-specific language codes; `INTEXTUM_OCR_LANGUAGES=deu,eng`. |
 | `--table-mode ruled\|docling\|predicted` | Table recognition mode; default: `ruled`; `INTEXTUM_TABLE_MODE`. |
 | `--detect-marks`, `--no-detect-marks` | Enable or disable drawn-line tags in ruled forms; default: off; `INTEXTUM_DETECT_MARKS`. |
