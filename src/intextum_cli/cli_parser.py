@@ -39,6 +39,13 @@ def _add_ocr_args(parser: argparse.ArgumentParser) -> None:
         help="tag text in ruled forms that lines underline, strike or cross "
         "(INTEXTUM_DETECT_MARKS in environment or .env; default: off)",
     )
+    group.add_argument(
+        "--document-timeout",
+        type=float,
+        metavar="SECONDS",
+        help="time limit for recognizing one document "
+        "(INTEXTUM_DOCUMENT_TIMEOUT in environment or .env; default: 180)",
+    )
 
 
 def _add_llm_args(parser: argparse.ArgumentParser) -> None:

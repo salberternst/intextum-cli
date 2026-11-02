@@ -151,6 +151,7 @@ def _run_groups(
             ocr_languages=options.ocr_languages,
             table_mode=options.table_mode,
             detect_marks=options.detect_marks,
+            document_timeout=options.document_timeout,
         ),
         classifier=LlmClassifier(llm, library.store) if llm else None,
         llm=llm,

@@ -10,7 +10,7 @@ import threading
 from dataclasses import dataclass, field, replace
 from pathlib import Path
 
-from .config import OCR_ENGINES, TABLE_MODES
+from .config import DEFAULT_DOCUMENT_TIMEOUT, OCR_ENGINES, TABLE_MODES
 from .conversion_marks import mark_cancellations
 from .conversion_readers import read_csv_text, read_msg_text
 from .conversion_recovery import restore_recognized_text
@@ -175,6 +175,7 @@ class Converter:
         ocr_languages: list[str] | tuple[str, ...] = (),
         table_mode: str = "ruled",
         detect_marks: bool = False,
+        document_timeout: float = DEFAULT_DOCUMENT_TIMEOUT,
     ):
         if ocr_engine not in OCR_ENGINES:
             raise ValueError(f"unknown OCR engine: {ocr_engine}")
@@ -186,6 +187,7 @@ class Converter:
         self.ocr_languages = tuple(ocr_languages)
         self.table_mode = table_mode
         self.detect_marks = detect_marks
+        self.document_timeout = document_timeout
         self._docling = None
         self._docling_ocr = None
         self._memory: dict[str, ConvertedFile] = {}
@@ -222,7 +224,7 @@ class Converter:
         options.generate_page_images = True
         options.generate_picture_images = True
         options.images_scale = 1.0
-        options.document_timeout = 180.0
+        options.document_timeout = self.document_timeout
         if self.ocr_engine == "tesseract":
             options.ocr_options = TesseractCliOcrOptions()
         if self.ocr_languages:

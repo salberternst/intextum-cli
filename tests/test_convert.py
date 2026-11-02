@@ -62,6 +62,19 @@ def test_ocr_engine_and_languages_have_separate_persistent_caches(tmp_path):
     assert record.settings["table_mode"] == "predicted"
 
 
+def test_document_timeout_reaches_docling_without_changing_the_cache_key(tmp_path):
+    from docling.datamodel.base_models import InputFormat
+
+    docling = Converter(document_timeout=600)._build_docling(force_ocr=False)
+    options = docling.format_to_options[InputFormat.PDF].pipeline_options
+    assert options.document_timeout == 600
+    path = tmp_path / "scan.pdf"
+    path.write_bytes(b"x")
+    assert Converter(document_timeout=600).cache_key(path) == Converter().cache_key(
+        path
+    )
+
+
 @pytest.mark.parametrize(
     "mode,matching", [("ruled", True), ("docling", True), ("predicted", False)]
 )

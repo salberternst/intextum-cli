@@ -159,13 +159,16 @@ def test_recognition_settings_use_defaults_file_environment_and_flags(
         "ruled",
     )
     assert defaults.detect_marks is False
+    assert defaults.document_timeout == 180
     (tmp_path / ".env").write_text(
         "INTEXTUM_OCR_ENGINE=tesseract\n"
         "INTEXTUM_OCR_LANGUAGES=deu, eng\n"
         "INTEXTUM_TABLE_MODE=predicted\n"
         "INTEXTUM_DETECT_MARKS=yes\n"
+        "INTEXTUM_DOCUMENT_TIMEOUT=600\n"
     )
     settings = load_recognition_settings(tmp_path)
+    assert settings.document_timeout == 600
     assert settings.ocr_engine == "tesseract"
     assert settings.ocr_languages == ["deu", "eng"]
     assert settings.table_mode == "predicted"
@@ -178,11 +181,20 @@ def test_recognition_settings_use_defaults_file_environment_and_flags(
         ocr_languages=["fra"],
         table_mode="ruled",
         detect_marks=False,
+        document_timeout=900,
     )
+    assert settings.document_timeout == 900
     assert settings.ocr_engine == "auto"
     assert settings.ocr_languages == ["fra"]
     assert settings.table_mode == "ruled"
     assert settings.detect_marks is False
+
+
+@pytest.mark.parametrize("raw", ["soon", "0", "-5", "nan", "inf"])
+def test_recognition_settings_reject_invalid_document_timeout(tmp_path, raw):
+    (tmp_path / ".env").write_text(f"INTEXTUM_DOCUMENT_TIMEOUT={raw}\n")
+    with pytest.raises(ConfigError, match="INTEXTUM_DOCUMENT_TIMEOUT"):
+        load_recognition_settings(tmp_path)
 
 
 @pytest.mark.parametrize(
@@ -255,6 +267,7 @@ def test_extract_passes_project_settings_to_client_and_pipeline(
         captured["ocr_engine"] = kwargs["converter"].ocr_engine
         captured["ocr_languages"] = kwargs["converter"].ocr_languages
         captured["table_mode"] = kwargs["converter"].table_mode
+        captured["document_timeout"] = kwargs["converter"].document_timeout
         return Summary()
 
     monkeypatch.setattr(llm, "OpenAiJsonLlm", make_client)
@@ -276,6 +289,8 @@ def test_extract_passes_project_settings_to_client_and_pipeline(
         "deu",
         "--table-mode",
         "docling",
+        "--document-timeout",
+        "600",
     ]
     if explicit_context is not None:
         args += ["--context-length", str(explicit_context)]
@@ -290,6 +305,7 @@ def test_extract_passes_project_settings_to_client_and_pipeline(
     assert captured["options"].ocr_languages == ["deu"]
     assert captured["ocr_languages"] == ("deu",)
     assert captured["options"].table_mode == captured["table_mode"] == "docling"
+    assert captured["options"].document_timeout == captured["document_timeout"] == 600
     assert (
         captured["options"].max_output_tokens == captured["max_output_tokens"] == 8192
     )

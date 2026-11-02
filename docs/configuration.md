@@ -43,6 +43,7 @@ INTEXTUM_OCR_ENGINE=tesseract        # --ocr-engine
 INTEXTUM_OCR_LANGUAGES=deu,eng       # --ocr-language, comma-separated
 INTEXTUM_TABLE_MODE=ruled            # --table-mode
 INTEXTUM_DETECT_MARKS=true           # --detect-marks
+INTEXTUM_DOCUMENT_TIMEOUT=600        # --document-timeout, seconds per document
 ```
 
 ## Settings file discovery
@@ -66,6 +67,7 @@ document processing.
 | `INTEXTUM_OCR_LANGUAGES` | `--ocr-language` (repeatable) | Engine defaults |
 | `INTEXTUM_TABLE_MODE` | `--table-mode` | `ruled` |
 | `INTEXTUM_DETECT_MARKS` | `--detect-marks`, `--no-detect-marks` | `false` |
+| `INTEXTUM_DOCUMENT_TIMEOUT` | `--document-timeout` | `180` |
 | `INTEXTUM_VERIFIER_MODEL` | `--verifier-model` | Unset; verification disabled |
 | `INTEXTUM_VERIFIER_BASE_URL` | `--verifier-base-url` | Extraction endpoint |
 | `INTEXTUM_VERIFIER_API_KEY` | `--verifier-api-key` | Extraction key for the same endpoint only |

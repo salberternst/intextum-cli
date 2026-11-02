@@ -52,6 +52,7 @@ def cmd_extract(args: argparse.Namespace) -> int:
             ocr_languages=args.ocr_languages,
             table_mode=args.table_mode,
             detect_marks=args.detect_marks,
+            document_timeout=args.document_timeout,
         )
         verifier_settings = (
             None
@@ -190,6 +191,7 @@ def cmd_extract(args: argparse.Namespace) -> int:
         ocr_languages=recognition.ocr_languages,
         table_mode=recognition.table_mode,
         detect_marks=recognition.detect_marks,
+        document_timeout=recognition.document_timeout,
         max_output_tokens=args.max_output_tokens,
         thinking=args.thinking,
         context_length=context_length,
@@ -203,6 +205,7 @@ def cmd_extract(args: argparse.Namespace) -> int:
         ocr_languages=options.ocr_languages,
         table_mode=options.table_mode,
         detect_marks=options.detect_marks,
+        document_timeout=options.document_timeout,
     )
     summary = run(
         groups,

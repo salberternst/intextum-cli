@@ -105,6 +105,7 @@ def cmd_convert(args: argparse.Namespace) -> int:
             ocr_languages=args.ocr_languages,
             table_mode=args.table_mode,
             detect_marks=args.detect_marks,
+            document_timeout=args.document_timeout,
         )
     except ConfigError as exc:
         raise CommandError(str(exc)) from exc
@@ -114,6 +115,7 @@ def cmd_convert(args: argparse.Namespace) -> int:
         ocr_languages=recognition.ocr_languages,
         table_mode=recognition.table_mode,
         detect_marks=recognition.detect_marks,
+        document_timeout=recognition.document_timeout,
     ).convert(args.file)
     if converted.error:
         raise CommandError(converted.error)

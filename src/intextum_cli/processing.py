@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from .config import DEFAULT_DOCUMENT_TIMEOUT
 from .dedupe import Duplicate
 from .groups import Group, scope_resolver
 from .schema import DocumentClass
@@ -25,6 +26,7 @@ class Options:
     ocr_languages: list[str] = field(default_factory=list)
     table_mode: str = "ruled"
     detect_marks: bool = False
+    document_timeout: float = DEFAULT_DOCUMENT_TIMEOUT
     max_output_tokens: int = 4096
     thinking: bool = False
     context_length: int | None = None

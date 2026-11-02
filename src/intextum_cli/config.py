@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -15,6 +16,7 @@ if TYPE_CHECKING:
 DEFAULT_BASE_URL = "http://localhost:11434/v1"
 OCR_ENGINES = ("auto", "tesseract")
 TABLE_MODES = ("ruled", "docling", "predicted")
+DEFAULT_DOCUMENT_TIMEOUT = 180.0
 _SWITCHES = {
     **dict.fromkeys(("1", "true", "yes", "on"), True),
     **dict.fromkeys(("0", "false", "no", "off"), False),
@@ -64,6 +66,7 @@ class RecognitionSettings:
     ocr_languages: list[str]
     table_mode: str
     detect_marks: bool = False
+    document_timeout: float = DEFAULT_DOCUMENT_TIMEOUT
 
 
 def load_recognition_settings(
@@ -74,6 +77,7 @@ def load_recognition_settings(
     ocr_languages: list[str] | None = None,
     table_mode: str | None = None,
     detect_marks: bool | None = None,
+    document_timeout: float | None = None,
 ) -> RecognitionSettings:
     """Resolve OCR and table settings with the same precedence as model settings.
 
@@ -102,11 +106,24 @@ def load_recognition_settings(
     switch = (raw_marks or "false").strip().casefold()
     if switch not in _SWITCHES:
         raise ConfigError(f"INTEXTUM_DETECT_MARKS must be true or false: {raw_marks}")
+    raw_timeout = value(
+        "INTEXTUM_DOCUMENT_TIMEOUT",
+        None if document_timeout is None else str(document_timeout),
+    )
+    try:
+        timeout = float(raw_timeout) if raw_timeout else DEFAULT_DOCUMENT_TIMEOUT
+    except ValueError:
+        timeout = math.nan
+    if not (math.isfinite(timeout) and timeout > 0):
+        raise ConfigError(
+            f"INTEXTUM_DOCUMENT_TIMEOUT must be a positive number: {raw_timeout}"
+        )
     return RecognitionSettings(
         ocr_engine=engine,
         ocr_languages=languages,
         table_mode=mode,
         detect_marks=_SWITCHES[switch],
+        document_timeout=timeout,
     )
 
 
